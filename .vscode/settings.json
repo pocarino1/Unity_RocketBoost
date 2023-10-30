@@ -52,5 +52,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "RocketBoost.sln"
+    "dotnet.defaultSolution": "RocketBoost.sln",
+    "dotnet.preferCSharpExtension": true
 }
