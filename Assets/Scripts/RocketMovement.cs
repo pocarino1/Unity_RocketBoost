@@ -9,10 +9,13 @@ public class RocketMovement : MonoBehaviour
 
     private Rigidbody RocketRigidbody = null;
 
+    private AudioSource RocketBoostSound = null;
+
     // Start is called before the first frame update
     void Start()
     {
         RocketRigidbody = GetComponent<Rigidbody>();
+        RocketBoostSound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -27,6 +30,18 @@ public class RocketMovement : MonoBehaviour
         if(Input.GetKey(KeyCode.Space))
         {
             RocketRigidbody.AddRelativeForce(Vector3.up * BoostPower * Time.deltaTime);
+
+            if(RocketBoostSound != null && !RocketBoostSound.isPlaying)
+            {
+                RocketBoostSound.Play();
+            }
+        }
+        else
+        {
+            if(RocketBoostSound != null && RocketBoostSound.isPlaying)
+            {
+                RocketBoostSound.Stop();
+            }
         }
     }
 
