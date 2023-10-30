@@ -42,7 +42,7 @@ public class RocketMovement : MonoBehaviour
             {
                 RocketBoostSound.Stop();
             }
-        }
+        } 
     }
 
     private void ProcessRotation()
