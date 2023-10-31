@@ -3,6 +3,17 @@ using UnityEngine.SceneManagement;
 
 public class CollisionHandler : MonoBehaviour
 {
+    [SerializeField] private float LevelLoadDelayTime = 0.5f;
+    [SerializeField] private AudioClip RocketCrashSound;
+    [SerializeField] private AudioClip LevelSuccessSound;
+    private bool ActivateCollision = true;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        ActivateCollision = true;
+    }
+
     /// <summary>
     /// OnCollisionEnter is called when this collider/rigidbody has begun
     /// touching another rigidbody/collider.
@@ -10,35 +21,68 @@ public class CollisionHandler : MonoBehaviour
     /// <param name="other">The Collision data associated with this collision.</param>
     private void OnCollisionEnter(Collision other)
     {
+        if(!ActivateCollision)
+        {
+            return;
+        }
+
         switch(other.gameObject.tag)
         {
-            case "Start":
-            {
-                Debug.Log("Rocket is Start Point!");
-            }
-            break;
             case "Goal":
             {
-                Debug.Log("Rocket is Goal Point!");
+                GameStateChange(true);  
             }
             break;
             case "Fuel":
             {
-                Debug.Log("Pick Up Fuel!");
                 Destroy(other.gameObject);
             }
             break;
             default:
             {
-                Debug.Log("Crash! Rocket Destroy!");
-                Invoke("RestartGame", 1.0f);
+                if(other.gameObject.tag != "Start")
+                {
+                    GameStateChange(false);                    
+                }
             }
             break;
         }
     }
 
-    private void RestartGame()
+    private void GameStateChange(bool IsSuccess)
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        ActivateCollision = false;
+
+        RocketMovement Movement = GetComponent<RocketMovement>();
+        if(Movement != null)
+        {
+            Movement.SetDisableComponent();
+            Movement.PlayEffectSound(IsSuccess ? LevelSuccessSound : RocketCrashSound);
+        }
+
+        if(IsSuccess)
+        {
+            Rigidbody RocketRigidbody = GetComponent<Rigidbody>();
+            if(RocketRigidbody != null)
+            {
+                RocketRigidbody.freezeRotation = true;
+            }
+        }
+
+        Invoke(IsSuccess ? "NextLevel" : "RestartLevel", LevelLoadDelayTime);
+    }
+
+    private void RestartLevel()
+    {
+        int CurrentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(CurrentSceneIndex);
+    }
+
+    private void NextLevel()
+    {
+        int NextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        NextSceneIndex = NextSceneIndex >= SceneManager.sceneCountInBuildSettings ? 0 : NextSceneIndex;
+
+        SceneManager.LoadScene(NextSceneIndex);
     }
 }
