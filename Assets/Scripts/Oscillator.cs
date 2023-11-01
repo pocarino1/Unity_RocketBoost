@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Oscillator : MonoBehaviour
 {
-    [SerializeField] private Vector3 MovementVector;
-    [SerializeField] [Range(0, 1)] private float MovementFactor;
+    [SerializeField] private Vector3 MovementVector = Vector3.zero;
+    private float MovementFactor = 0.0f;
     [SerializeField] private float Period = 2.0f;
 
     Vector3 StartingPosition;
@@ -24,6 +25,11 @@ public class Oscillator : MonoBehaviour
 
     private void UpdateOscillator()
     {
+        if(Period <= Mathf.Epsilon)
+        {
+            return;
+        }
+
         float Cycles = Time.time / Period;
         const float tau = Mathf.PI * 2.0f;
         float RawSinWave = Mathf.Sin(Cycles * tau);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RocketMovement : MonoBehaviour
 {
@@ -9,12 +10,16 @@ public class RocketMovement : MonoBehaviour
     [SerializeField] private float RotationPower = 0.05f;
     [SerializeField] private AudioClip RocketThrustSound = null;
     [SerializeField] private ParticleSystem RocketThrustParticleEffect = null;
+    [SerializeField] private VariableJoystick RocketJoystick = null;
+    [SerializeField] private Button BoostButton = null;
 
     private Rigidbody RocketRigidbody = null;
 
     private AudioSource RocketAudioSource = null;
 
     private AudioClip CurrentPlayAudioClip = null;
+
+    private bool BoosterButtonDown = false;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +33,19 @@ public class RocketMovement : MonoBehaviour
         {
             RocketThrustParticleEffect.Stop();
         }
+
+        BoosterButtonDown = false;
+    }
+
+    /// <summary>
+    /// This function is called when the MonoBehaviour will be destroyed.
+    /// </summary>
+    void OnDestroy()
+    {
+        if(BoostButton != null)
+        {
+            BoostButton.onClick.RemoveListener(StartThrusting);
+        }
     }
 
     // Update is called once per frame
@@ -39,7 +57,7 @@ public class RocketMovement : MonoBehaviour
 
     private void ProcessThrust()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) || BoosterButtonDown)
         {
             StartThrusting();
         }
@@ -81,6 +99,19 @@ public class RocketMovement : MonoBehaviour
         {
             RocketRotation(-RotationPower);
         }
+
+        // if (RocketJoystick != null)
+        // {
+        //     float HorizontalValue = RocketJoystick.Horizontal;
+        //     if (HorizontalValue < 0.0f)
+        //     {
+        //         RocketRotation(RotationPower);
+        //     }
+        //     else if (HorizontalValue > 0.0f)
+        //     {
+        //         RocketRotation(-RotationPower);
+        //     }
+        // }
     }
 
     private void RocketRotation(float RotationValue)
@@ -135,5 +166,15 @@ public class RocketMovement : MonoBehaviour
 
             CurrentPlayAudioClip = null;
         }
+    }
+
+    public void StartBooster()
+    {
+        BoosterButtonDown = true;
+    }
+
+    public void StopBooster()
+    {
+        BoosterButtonDown = false;
     }
 }

@@ -4,6 +4,8 @@ ProjectSettings
 Logs
 Packages
 obj
+Builds
+AndroidBuilds
 
 .gradle/
 
