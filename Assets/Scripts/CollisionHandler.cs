@@ -4,14 +4,36 @@ using UnityEngine.SceneManagement;
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] private float LevelLoadDelayTime = 0.5f;
-    [SerializeField] private AudioClip RocketCrashSound;
-    [SerializeField] private AudioClip LevelSuccessSound;
-    private bool ActivateCollision = true;
+    [SerializeField] private AudioClip RocketCrashSound = null;
+    [SerializeField] private AudioClip LevelSuccessSound = null;
+    [SerializeField] private ParticleSystem LevelSuccessParticleEffect = null;
+    [SerializeField] private ParticleSystem RocketCrashParticleEffect = null;
+
+    private bool IsGameStateTransitioning = false;
+    private bool IsActivateCollision = true;
 
     // Start is called before the first frame update
     void Start()
     {
-        ActivateCollision = true;
+        IsGameStateTransitioning = false;
+        IsActivateCollision = true;
+    }
+
+    void Update()
+    {
+        RespondToDebugKeys();
+    }
+
+    private void RespondToDebugKeys()
+    {
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            NextLevel();
+        }
+        else if(Input.GetKeyDown(KeyCode.C))
+        {
+            IsActivateCollision = !IsActivateCollision;
+        }
     }
 
     /// <summary>
@@ -21,7 +43,7 @@ public class CollisionHandler : MonoBehaviour
     /// <param name="other">The Collision data associated with this collision.</param>
     private void OnCollisionEnter(Collision other)
     {
-        if(!ActivateCollision)
+        if(IsGameStateTransitioning || !IsActivateCollision)
         {
             return;
         }
@@ -51,13 +73,31 @@ public class CollisionHandler : MonoBehaviour
 
     private void GameStateChange(bool IsSuccess)
     {
-        ActivateCollision = false;
+        IsGameStateTransitioning = true;
 
         RocketMovement Movement = GetComponent<RocketMovement>();
         if(Movement != null)
         {
             Movement.SetDisableComponent();
-            Movement.PlayEffectSound(IsSuccess ? LevelSuccessSound : RocketCrashSound);
+
+            if(IsSuccess)
+            {
+                Movement.PlayEffectSound(LevelSuccessSound);
+
+                if(LevelSuccessParticleEffect != null)
+                {
+                    LevelSuccessParticleEffect.Play();
+                }
+            }
+            else
+            {
+                Movement.PlayEffectSound(RocketCrashSound);
+
+                if(RocketCrashParticleEffect != null)
+                {
+                    RocketCrashParticleEffect.Play();
+                }
+            }
         }
 
         if(IsSuccess)

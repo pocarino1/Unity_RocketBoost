@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 
 public class RocketMovement : MonoBehaviour
 {
     [SerializeField] private float BoostPower = 100.0f;
     [SerializeField] private float RotationPower = 0.05f;
-    [SerializeField] private AudioClip RocketThrustSound;
+    [SerializeField] private AudioClip RocketThrustSound = null;
+    [SerializeField] private ParticleSystem RocketThrustParticleEffect = null;
 
     private Rigidbody RocketRigidbody = null;
 
@@ -21,6 +23,11 @@ public class RocketMovement : MonoBehaviour
 
         RocketRigidbody = GetComponent<Rigidbody>();
         RocketAudioSource = GetComponent<AudioSource>();
+
+        if (RocketThrustParticleEffect != null)
+        {
+            RocketThrustParticleEffect.Stop();
+        }
     }
 
     // Update is called once per frame
@@ -34,13 +41,33 @@ public class RocketMovement : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            RocketRigidbody.AddRelativeForce(Vector3.up * BoostPower * Time.deltaTime);
-
-            PlayEffectSound(RocketThrustSound);
+            StartThrusting();
         }
         else
         {
-            StopEffectSound();
+            StopThrusting();
+        }
+    }
+
+    private void StartThrusting()
+    {
+        RocketRigidbody.AddRelativeForce(Vector3.up * BoostPower * Time.deltaTime);
+
+        PlayEffectSound(RocketThrustSound);
+
+        if (RocketThrustParticleEffect != null && !RocketThrustParticleEffect.isPlaying)
+        {
+            RocketThrustParticleEffect.Play();
+        }
+    }
+
+    private void StopThrusting()
+    {
+        StopEffectSound();
+
+        if (RocketThrustParticleEffect != null && RocketThrustParticleEffect.isPlaying)
+        {
+            RocketThrustParticleEffect.Stop();
         }
     }
 
@@ -71,11 +98,16 @@ public class RocketMovement : MonoBehaviour
         {
             RocketAudioSource.Stop();
         }
+
+        if (RocketThrustParticleEffect != null && RocketThrustParticleEffect.isPlaying)
+        {
+            RocketThrustParticleEffect.Stop();
+        }
     }
 
     public void PlayEffectSound(AudioClip EffectSoundClip)
     {
-        if(CurrentPlayAudioClip == EffectSoundClip)
+        if (CurrentPlayAudioClip == EffectSoundClip)
         {
             return;
         }
